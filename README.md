@@ -61,3 +61,34 @@ Docker workflow:
 <img width="1324" height="235" alt="image" src="https://github.com/user-attachments/assets/978d0337-12c5-4786-8248-4e139f63456b" />
 
 As we can see: Docker daemon is responsible for the creation, and images which obviously will also be a Single Point of Failure. If the daemon is down, container orchestrator calls would fail resulting in system downtime.
+
+### Lifecycle of docker
+It all starts with the Dockerfile creation. There are three fine steps:
+- docker build
+- docker run
+- docker push (push your image to the registry [Optional])
+
+<img width="700" height="384" alt="image" src="https://github.com/user-attachments/assets/825debe7-4dc1-4dd1-b8ed-3eb095fa86b6" />
+
+Inorder to push to docker registry/any artifactory (like Jfrog), we'll need an account and place it to our terminal to enable remote pull & push. So lets login to https://www.docker.com and create an account and follow these steps:
+- Click on profile
+- Go to account settings
+- Choose "Personal access tokens"
+- Hit "Generate new token"
+- Make sure to note down the token
+
+On terminal:
+```
+docker login -u username
+```
+and then, paste the token. 
+
+Some basic commands:
+```
+docker images                               # view the docker images
+docker ps                                   # view the running containers
+docker ps -a                                # view all the containers (stopped ones too)
+docker rmi image-name/id                    # remove an image
+docker build -t dockerusername/repo:tag     # build the Dockerfile
+docker run image                            # to run the docker image that has been created before
+```
