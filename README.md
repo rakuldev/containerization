@@ -83,12 +83,73 @@ docker login -u username
 ```
 and then, paste the token. 
 
-Some basic commands:
+Some commands used on day-to-day basis:
 ```
 docker images                               # view the docker images
 docker ps                                   # view the running containers
 docker ps -a                                # view all the containers (stopped ones too)
 docker rmi image-name/id                    # remove an image
 docker build -t dockerusername/repo:tag     # build the Dockerfile
-docker run image                            # to run the docker image that has been created before
+docker run image imageid                    # to run the docker image that has been created before
+docker image prune
+  options:
+    - -a or --all                           # docker image prune -a
+    - --filter                              # docker image prune --filter="until=24h" [until=<timestamp>) the dangling images existing until the last 24 hours would be erased] 
+    - -f or --force                         # docker image prune -f
+docker container prune
+  options:
+    - --filter                              # docker container prune --filter="until=24h" [until=<timestamp>) the crashed or stopped containers created until last 24 hours should be erased]
+    - -f or --force                         # docker container prune -f
+docker exec appname -it /bin/bash           # to open a local terminal within container [ -i (interactive), -t (terminal), appname - WORKDIR ]
+docker logs -f appname                      # to view logs
+
+for more details, visit the docker cli docs: https://docs.docker.com/reference/cli/docker/ 
 ```
+
+Dockerfile is a file where we write down all our steps to perform containerization of docker builds. 
+
+### Best Practices
+Before getting into multistage dockerfile and docker compose, let's take a look into some best practices to have a core understanding and efficient usage of docker file. 
+
+<b>layering</b>:
+  Every line written in the docker file would be a layer, and would be a cache. Docker layer cache checks if current instruction AND all previous instructions are unchanged. Lets say:
+  ```
+  FROM ubuntu 
+  RUN sudo apt-get update && sudo apt install python3 python3-pip
+  COPY requirements.txt .
+  RUN pip install requirements.txt
+  COPY . /app
+  ```
+Each of these instructions will take place sequentially. Which means, on running the same set of code without any changes, will lead to a faster execution: 
+ ```
+  FROM ubuntu                                                      (no changes) - CACHE HIT!
+  RUN sudo apt-get update && sudo apt install python3 python3-pip  (no changes) - CACHE HIT!
+  COPY requirements.txt .                                          (no changes) - CACHE HIT!
+  RUN pip install requirements.txt                                 (no changes) - CACHE HIT!
+  COPY . /app                                                      (code changes) - CACHE MISS!
+  ```
+But there could be various other scenarios as well. 
+
+Build 1 (first time):
+- Line 1: MISS (no cache exists yet) → downloads base image
+- Line 2: MISS → installs linux packages
+- Line 3: MISS → copies file
+- Line 4: MISS → installs packages (2 minutes)
+- Line 5: MISS → copies code
+
+Build 2 (you changed only app.py):
+- Line 1: HIT → skips (base image unchanged)
+- Line 2: HIT → skips (same packages)
+- Line 3: HIT → skips (requirements.txt unchanged)
+- Line 4: HIT → skips (layer above hit + instruction unchanged)
+- Line 5: MISS → rebuilds (source code changed)
+
+Build 3 (you added a package to requirements.txt):
+- Line 1: HIT → skips
+- Line 2: HIT → skips
+- Line 3: MISS → rebuilds (file content changed)
+- Line 4: MISS → rebuilds (layer above missed)
+- Line 5: MISS → rebuilds (layer above missed)
+
+So, now we could get a clear context that, if one line changes, the following sequence of lines will miss the cache and rebuilds again. Each layer is being rebuilt.
+
