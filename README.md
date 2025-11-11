@@ -153,3 +153,10 @@ Build 3 (you added a package to requirements.txt):
 
 So, now we could get a clear context that, if one line changes, the following sequence of lines will miss the cache and rebuilds again. Each layer is being rebuilt.
 
+Next, lets understand port mapping during run. What is port forwarding? 
+Since we have different layers (i.e., container within a VM, we should be running our application in container, but the customer hits the load balancer -> VM where the machine will not have any idea of what the port means).
+So mapping container port to VM's port is a mandatory part in web applications. 
+
+```
+docker run -d -p 8000:8000 myapp                         # -d - run in detached mode, -p - port. docker run -p <host_port>:<container_port> image
+```
