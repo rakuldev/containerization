@@ -160,3 +160,18 @@ So mapping container port to VM's port is a mandatory part in web applications.
 ```
 docker run -d -p 8000:8000 myapp                         # -d - run in detached mode, -p - port. docker run -p <host_port>:<container_port> image
 ```
+
+Docker has various commands to look for, but its not possible to remember all of them by heart, so developers rely on docs sometime to gather knowledge as needed. One of the important usage utility - Mount; which is used for doing various things. 
+
+```
+RUN docker ---mount=type=cache,target=/root/.cache/pip \
+pip install requirements.txt
+```
+
+Here, the catch is, when there is a cache miss, the layer would be re-run completely. For instance, there's a change in requirements.txt, the installation layer that comes after that will actually re-install the entire set of packages residing in requirements.txt. But when we use mount alongside cache, then we would actually store the pypi packages within cache (basically the location we are putting our cache is the location where the pip packages sit in, we are converting it into a cache so it will stay unchanged and only the newer ones will be added to it).
+
+There are a quite lot of attribute types we can have for mount like:
+- secret
+- volume
+- tmpfs
+
