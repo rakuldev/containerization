@@ -1,4 +1,4 @@
-# Containerization
+ # Containerization
 Putting on my understanding of containers, use cases of containers, reason behind using containers, and few practical examples from the repository to enhance the understanding of docker &amp; containers
 
 Engineering is not only about building something new or working, it all about achieving efficiency in something. So does devops tools are designed to induce 100% utilization of resources. Containerization is similar process which we will look in a detail. 
@@ -102,6 +102,7 @@ docker container prune
     - -f or --force                         # docker container prune -f
 docker exec appname -it /bin/bash           # to open a local terminal within container [ -i (interactive), -t (terminal), appname - WORKDIR ]
 docker logs -f appname                      # to view logs
+docker inspect appname                      # to view the container detials (like ip address, etc.,)
 
 for more details, visit the docker cli docs: https://docs.docker.com/reference/cli/docker/ 
 ```
@@ -175,3 +176,15 @@ There are a quite lot of attribute types we can have for mount like:
 - volume
 - tmpfs
 
+### Docker Networks
+<img width="1155" height="669" alt="image" src="https://github.com/user-attachments/assets/ad51710a-3c72-4801-8f20-d30eb46d2c8c" />
+
+In a systems perspective, this architecture seems reilable and enables communication between microservices and to host, but in a security point of view, there is a shared point of contact, which would be a root cause to <b>Single Point of Failure</b>. When 2 containers shares network traffic flow would disrupt since containers resides private behind a network, and this would mimic the NAT architecture. 
+- NAT - Network Address Translation: When a virtual machine resides in a host server machine, it basically shares the ip of host. It is create entrypoint for the incoming traffic.
+- Bridge - This would make the service (the containers) appear as a seperate device within the network. This will allow isolation between services and host and enables synchronous flow of communication between the containers without jeoparadizing the system. 
+
+Docker Network commands:
+```
+docker network ls                                               # to list the set of networks associated with the containers
+docker run -d container_name --network=network_type image_name  # to set the network type to a container        
+```
