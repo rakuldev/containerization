@@ -91,6 +91,20 @@ docker ps -a                                # view all the containers (stopped o
 docker rmi image-name/id                    # remove an image
 docker build -t dockerusername/repo:tag     # build the Dockerfile
 docker run image imageid                    # to run the docker image that has been created before
+  flags:
+    - -d - detached mode (will run the container in background and will let you continue to interact with the container without any hindrance
+    - it - Interactive terminal
+    - --rm - auto-remove container when stops
+    - --name - obviously the container name
+    - -p - port mapping
+    - --network - connect to specific network
+    - -v - to bind/mount a volume to the container (to have logs, persistant db volumes, run app without building)
+    - -w - set the working directory
+    - -e or --env - environment variable set
+    - -m or --memory - to set memory
+    - --cpus - to limit CPU usage
+    - --cpuset-cpus - to assign to specific cores
+there are a quite more, with regards to health checks, security & compliance, restarts, logging etc.,
 docker image prune
   options:
     - -a or --all                           # docker image prune -a
@@ -188,3 +202,5 @@ Docker Network commands:
 docker network ls                                               # to list the set of networks associated with the containers
 docker run -d container_name --network=network_type image_name  # to set the network type to a container        
 ```
+
+
