@@ -1,0 +1,15 @@
+docker network create private-net         # this is for creating a private bridge network (default) for container 2 
+docker network ls 
+
+docker run -d --name nginx2 --network=private-net nginx:latest   # attaching the network we've created to container 2
+docker inspect nginx2
+
+# Get the ip address
+# Trying pinging to it from host (in your terminal). it shouldn't work! as it is disconnected from host. So container 1 will serve as a medium to connect container 2 to host via container 1
+
+docker run -d --name nginx1 --network=bridge nginx:latest # create container 1
+
+docker network connect private-net nginx1 # now container 1 holds both bridge (via host) and private network
+
+docker exec nginx1 curl https://nginx2
+
