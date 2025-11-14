@@ -183,7 +183,7 @@ RUN docker ---mount=type=cache,target=/root/.cache/pip \
 pip install requirements.txt
 ```
 
-Here, the catch is, when there is a cache miss, the layer would be re-run completely. For instance, there's a change in requirements.txt, the installation layer that comes after that will actually re-install the entire set of packages residing in requirements.txt. But when we use mount alongside cache, then we would actually store the pypi packages within cache (basically the location we are putting our cache is the location where the pip packages sit in, we are converting it into a cache so it will stay unchanged and only the newer ones will be added to it).
+Here, the catch is, when there is a cache miss, the layer would be re-run completely. For instance, there's a change in requirements.txt, the installation layer that comes after that will actually re-install the entire set of packages residing in requirements.txt. But when we use mount alongside cache, then we would actually store the pypi packages within cache (basically the location we are putting our cache is the location where the pip packages sit in, we are converting it into a cache so it will stay unchanged and only the newer ones will be added to it). NOTE: The docker manages the volume in the host not in the container as container doesn't have a FS (Filesystem). 
 
 There are a quite lot of attribute types we can have for mount like:
 - secret
@@ -200,7 +200,7 @@ In a systems perspective, this architecture seems reilable and enables communica
 Docker Network commands:
 ```
 docker network ls                                               # to list the set of networks associated with the containers
-docker run -d container_name --network=network_type image_name  # to set the network type to a container        
+docker run -d container_name --network=network_type image_name  # to set the network type to a container         
 ```
 
 
