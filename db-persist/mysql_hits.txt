@@ -1,0 +1,21 @@
+# create a volume
+docker volume create mysql
+
+# check if the volume has been created (quick check)
+docker volume ls
+
+# spin up the container
+docker run -d --name db-persist -v mysql:/var/lib/mysql -e MYSQL_ROOT_PASSWORD:secret123 --restart on-failure mysql:9.5.0
+
+# get to the docker fs
+docker exec -it db-persist /bin/bash
+
+# login to mysql
+mysql -u root -p
+secret123 is our password as set
+
+# create db, table 
+# remote container
+# re-spin the container
+# login to mysql
+# check for db, tables that you've created before
