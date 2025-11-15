@@ -1,0 +1,1 @@
+docker run --rm -w /app -v ${PWD}:/app python:3.11-alpine python app.py
