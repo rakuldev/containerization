@@ -461,3 +461,4 @@ docker-compose unpause
 # show head processes
 docker-compose top
 ```
+To learn more about creating docker compose for various frameworks & languages, take a look into: https://github.com/docker/awesome-compose 
