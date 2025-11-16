@@ -50,7 +50,7 @@ Resource transmission workflow:
 <img width="1006" height="433" alt="image" src="https://github.com/user-attachments/assets/55e6fbba-8789-4146-9713-85646fbcb200" />
 
 
-### Docker
+## Docker
 Docker is a container run time environment which serves as a platform to ease the container creation, start and other processes. Typically a docker engine would consist of:
 - Docker CLI
 - Docker API
@@ -203,4 +203,261 @@ docker network ls                                               # to list the se
 docker run -d container_name --network=network_type image_name  # to set the network type to a container         
 ```
 
+## Docker Compose:
+So far, we saw Docker which is a container run time environment. Basically docker is one environment that can hold a single service in its filesystem, likewise multiple microservices are consolidated in-order to form an application. We need microservices to communicate to each other to have a successful execution of a service, also we need something which could manage the container all in one single environment, because in enterprise software, we'll have a huge bucket of microservcies which should be put on place manually one-by-one which is not efficient. To solve that issue, and also to perform local checks all-in-one instead of going on for k8s for orchestration, we use docker-compose, as it manages containers on basis of the dependencies. 
 
+Lets look into the format of docker-compose and some important attributes of it. Fundamentally, docker compose uses YAML which carries the containers, networks, volumes & etc., in it. Each entity carries its own attributes. 
+
+We'll have compose.yaml (previously called docker-compose.yaml - a file rename with no technical modifications happened of 2021), which we'll be building just like Dockerfile. 
+
+### Format of docker-compose:
+```
+compose.yaml
+
+# version
+version: '4.1'
+
+# containers
+services:
+  app1:
+    image:
+    ports:
+
+  app2:
+
+volumes:
+  volume1:
+
+networks:
+   mynet: 
+```
+
+### Service Attributes:
+1. Image vs Build:
+```
+# Use existing images from local or remote
+
+services:
+  web:
+    image: python:3.11-alpine
+
+# Create image from Dockerfile
+
+services:
+  web:
+    context: ./build          # Location of where the Dockerfile resides
+    dockerfile: Dockerfile    # Name of Dockerfile (since Dockerfile can be of any name like Dockerfile.dev or whatever the developer wishes to) \
+```
+
+2. Environment:
+```
+environment:
+  - NODE_ENV=prod
+  - API_KEY=key
+
+environment:
+  - NODE: prod
+  - API_KEY: key
+
+env_file:
+  - .env
+```
+
+3. Ports:
+```
+ports:               # Its always host:container
+  - 8000:8000
+  - 8080:80 
+```
+
+4. Volumes:
+```
+services:
+  volumes:                      # its always host:container
+    - $(pwd):/var/lib/mysql     # Named volume
+    - $(pwd):./app              # bind mount
+
+    - ./config/json:/app/config.json:ro     # read-only
+```
+
+5. Networks:
+```
+services:
+  web:
+    networks:
+      - frontend
+      - backend
+
+  db:
+    networks:
+      - backend
+networks:
+  - frontend:
+  - backend:
+```
+
+6. Depends On (Critical one):
+```
+services:
+  app:
+    depends_on:
+      - db
+      - cache   # meaning if these services are up, only then the app will be turned up and running (for service reliability)
+```
+
+7. Command & Entrypoint:
+```
+services:
+  app:
+    - image: python:3.11-alpine
+    - command: python app.py
+      # Overrides Dockerfile's CMD
+
+      # Even multiple commands can be used
+    - command: sh -c "python manage.py migrate &&
+                   python manage.py runserver 0.0.0.0:8000"
+    - entryoint: /bin/bash
+```
+
+8. Working Directory:
+```
+services:
+  app:
+    working_dir: /app
+```
+
+9. Restart Policy:
+```
+services:
+  app:
+    restart: no
+    restart: always
+    restart: unless-stopped 
+    restart: on-failure
+```
+
+10. Resource limits (CPU & RAM mostly):
+```
+services:
+  app:
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 512M
+        reservations: 
+          cpus: '0.25'
+          memory: 256M
+```
+
+11. Container name:
+```
+services:
+  app:
+    container_name: web1
+```
+
+There are a few more like health check, labels, logging etc., which a simple google search might get you the format. Building a docker compose is pretty simple if you know how the system works, as compose is nothing but a architecture written in a compute file. If you know how to build it and work it locally, you can build the compose file pretty easily with the attributes that we have in place. 
+
+### Docker Compose commands
+```
+# turn up the containers & system
+docker-compose up
+
+# start the services in detached mode
+docker-compose up -d
+
+# stop services
+docker-compose stop
+
+# stop services & remove containers
+docker-compose down
+
+# stop & remove volumes
+docker-compose down -v
+
+# stop & remove containers + images
+docker-compose down --rmi all
+```
+
+### Docker Compose build commands
+```
+# build images
+docker-compose build
+
+# build images without cache
+docker-compose build --no-cache            # We saw something before that Dockerfile runs every line and stores them as cache, and if nothing changes, cache HIT will happen, to avoid usage of cache and restart everything, we use this.
+
+# build specific service
+docker-compose build app
+
+# build & start
+docker-compose up --build
+
+# force recreate containers
+docker-compose up --force-recreate
+```
+
+### Log Monitoring
+```
+# see logs
+docker-compose logs
+
+# see live-logs
+docker-compose logs -f
+
+# logs for specific service
+docker-compose logs app
+
+# last 100 lines (basic linux commands like [tail & head])
+docker-compose logs --tail=100
+
+# with timestamps
+docker-compose logs -t 
+```
+
+### Service Management
+```
+# see running containers
+docker-compose ps
+
+# see all containers
+docker-compose ps -a
+
+# Execute command in a service
+docker-compose exec app bash
+docker-compose exec db mysql -u root
+
+# run one specific command in a service
+docker-compose run app python manage.py migrate
+
+# scale up the service (The k8s pods can manage it in production level usecases)
+docker-compose up -d --scale app=3
+
+# restart service
+docker-compose restart app
+
+# stop service
+docker-compose stop app
+
+# remove stopped containers
+docker-compose rm
+```
+
+### Other commands
+```
+# pull images
+docker-compose pull
+
+# push images
+docker-compose push
+
+# pause services
+docker-compose pause
+
+# unpause services
+docker-compose unpause
+
+# show head processes
+docker-compose top
+```
